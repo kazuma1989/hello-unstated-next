@@ -1,19 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { useState } from "react";
-
-function useCounter(initialState = 0) {
-  const [count, setCount] = useState(initialState);
-
-  return {
-    count,
-    decrement() {
-      setCount(v => v - 1);
-    },
-    increment() {
-      setCount(v => v + 1);
-    }
-  };
-}
+import { useCounter } from "./useCounter";
 
 const Counter = createContext<ReturnType<typeof useCounter> | null>(null);
 

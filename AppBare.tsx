@@ -34,26 +34,34 @@ function CounterDisplay() {
   );
 }
 
-export function AppBare() {
-  const counter1 = useCounter();
-  const counter2 = useCounter(1);
-  const counter3 = useCounter(2);
+function Provider({
+  initialState = 0,
+  children
+}: {
+  initialState?: number;
+  children: React.ReactNode;
+}) {
+  const counter = useCounter(initialState);
 
+  return <Counter.Provider value={counter}>{children}</Counter.Provider>;
+}
+
+export function AppBare() {
   return (
-    <Counter.Provider value={counter1}>
+    <Provider>
       <CounterDisplay />
 
-      <Counter.Provider value={counter2}>
+      <Provider initialState={1}>
         <div>
           <div>
             <CounterDisplay />
           </div>
         </div>
-      </Counter.Provider>
+      </Provider>
 
-      <Counter.Provider value={counter3}>
+      <Provider initialState={2}>
         <CounterDisplay />
-      </Counter.Provider>
-    </Counter.Provider>
+      </Provider>
+    </Provider>
   );
 }

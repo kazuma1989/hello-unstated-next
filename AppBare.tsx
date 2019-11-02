@@ -1,15 +1,49 @@
 import React, { createContext, useContext } from "react";
 import { useCounter } from "./useCounter";
 
-const Counter = createContext<ReturnType<typeof useCounter> | null>(null);
+interface ContainerProviderProps<State = void> {
+  initialState?: State;
+  children: React.ReactNode;
+}
+
+interface Container<Value, State = void> {
+  Provider: React.ComponentType<ContainerProviderProps<State>>;
+  useContainer: () => Value;
+}
+
+function createContainer<Value, State = void>(
+  useHook: (initialState?: State) => Value
+): Container<Value, State> {
+  const Context = createContext<Value | null>(null);
+
+  return {
+    Provider({
+      initialState,
+      children
+    }: {
+      initialState?: State;
+      children: React.ReactNode;
+    }) {
+      const value = useHook(initialState);
+
+      return <Context.Provider value={value}>{children}</Context.Provider>;
+    },
+
+    useContainer() {
+      const container = useContext(Context);
+      if (!container) {
+        throw new Error();
+      }
+
+      return container;
+    }
+  };
+}
+
+const Counter = createContainer(useCounter);
 
 function CounterDisplay() {
-  const counter = useContext(Counter);
-  if (!counter) {
-    return null;
-  }
-
-  const { count, decrement, increment } = counter;
+  const { count, decrement, increment } = Counter.useContainer();
 
   return (
     <div>
@@ -20,34 +54,22 @@ function CounterDisplay() {
   );
 }
 
-function Provider({
-  initialState = 0,
-  children
-}: {
-  initialState?: number;
-  children: React.ReactNode;
-}) {
-  const counter = useCounter(initialState);
-
-  return <Counter.Provider value={counter}>{children}</Counter.Provider>;
-}
-
 export function AppBare() {
   return (
-    <Provider>
+    <Counter.Provider>
       <CounterDisplay />
 
-      <Provider initialState={1}>
+      <Counter.Provider initialState={1}>
         <div>
           <div>
             <CounterDisplay />
           </div>
         </div>
-      </Provider>
+      </Counter.Provider>
 
-      <Provider initialState={2}>
+      <Counter.Provider initialState={2}>
         <CounterDisplay />
-      </Provider>
-    </Provider>
+      </Counter.Provider>
+    </Counter.Provider>
   );
 }
